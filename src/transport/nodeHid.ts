@@ -115,12 +115,23 @@ class NodeHidHandle implements HidHandle {
 
   async sendFeatureReport(report: Uint8Array): Promise<void> {
     this.#assertOpen();
-    this.raw.sendFeatureReport(Array.from(report));
+    try {
+      this.raw.sendFeatureReport(Array.from(report));
+    } catch (err) {
+      throw new PerixError(
+        `设备不接受 feature report（report id ${report[0] ?? 0}）：${(err as Error).message}`,
+        'PROTOCOL',
+      );
+    }
   }
 
   async getFeatureReport(reportId: number, length: number): Promise<Uint8Array> {
     this.#assertOpen();
-    return new Uint8Array(this.raw.getFeatureReport(reportId, length));
+    try {
+      return new Uint8Array(this.raw.getFeatureReport(reportId, length));
+    } catch (err) {
+      throw new PerixError(`读取 feature report 失败：${(err as Error).message}`, 'PROTOCOL');
+    }
   }
 
   async read(timeoutMs: number): Promise<Uint8Array | null> {

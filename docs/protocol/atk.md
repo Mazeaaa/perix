@@ -26,6 +26,27 @@ VT 系列接收器会转发所有**寻址到鼠标**的报文，因此有线与 
 
 只有分帧，没有命令表。故意如此：命令字未验证前不写进代码。
 
+## 实测记录
+
+**2026-11-22 · `3554:F58A`（VXE NordicMouse 1K Dongle）**
+
+| 项目 | 结果 |
+|---|---|
+| 接口枚举 | 暴露 `0xFF02` / `0xFF03` / `0xFF04` / `0xFF05` 四个厂商集合 + 标准键盘集合（接口 2 还带了鼠标集合） |
+| `perix list` 识别 | 成功，归到 ATK / VXE |
+| `0xFF05` 被动监听 4s | 0 帧——静态配置集合，没有交互就没有流量（符合预期） |
+| `0xFF04` feature report 8 | **失败**：`HidD_SetFeature → ERROR_INVALID_FUNCTION` |
+
+最后一条是关键情报：这块接收器的 `0xFF04` 集合**不接受 feature report**。也就是说，
+"Compx 方案 = 0xFF04 + Feature report 8"这条路径并不适用于所有 VID，至少 `0x3554` 不是这样。
+
+下一步应该验证的方向：
+
+1. `0xFF05` + output report 8（BitMouse 的 63 字节帧），target 填 `1` 走接收器转发
+2. 或者确认 `0x3554` 走的是另一套（Compx 有 `0xFF04` 但用 output report 而非 feature）
+
+结论没出来之前，`atk-compx-dongle` 的进度保持"仅识别"，不往上写。
+
 ## 待验证
 
 - [ ] 设备信息（型号 / 固件 / 序列号）的请求-应答格式

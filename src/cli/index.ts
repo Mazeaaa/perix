@@ -6,6 +6,7 @@ import { hex, hexToBytes, bytesToHex, vidPid, clamp } from '../core/util.js';
 import { VENDORS } from '../core/vendors.js';
 import { DESCRIPTORS } from '../devices/load.js';
 import { buildProviders } from '../providers/index.js';
+import { readCompxInfo } from '../providers/compxSession.js';
 import { NodeHidTransport } from '../transport/nodeHid.js';
 import { table } from './table.js';
 
@@ -13,6 +14,7 @@ const HELP = `perix —— 一个软件管所有外设
 
 用法：
   perix list                      列出所有 HID 设备并标注识别结果
+  perix info [选项]               读取设备信息（Compx 方案，只读命令）
   perix devices                   查看已收录的设备与实现进度
   perix watch [选项]              被动监听某个接口的输入报告（不发送任何报文）
   perix raw [选项]                发送一帧原始报文（危险，必须加 --yes）
@@ -223,6 +225,47 @@ function runningProcesses(): string[] {
   }
 }
 
+async function cmdInfo(args: Args): Promise<void> {
+  const page = num(args.flags.page) ?? 0xff04;
+  const vid = num(args.flags.vid);
+  const pid = num(args.flags.pid);
+  const transport = new NodeHidTransport();
+  const target = (await transport.list()).find(
+    (d) =>
+      (vid === undefined || d.vendorId === vid) &&
+      (pid === undefined || d.productId === pid) &&
+      d.usagePage === page,
+  );
+  if (!target) {
+    console.error(`没有匹配到用途页 0x${hex(page)} 的接口。先跑 perix list。`);
+    process.exitCode = 1;
+    return;
+  }
+  console.log(`读取 ${vidPid(target)}（用途页 0x${hex(page)}，仅只读命令）\n`);
+  const handle = await transport.open(target);
+  const { info, trace } = await readCompxInfo(handle);
+  await handle.close();
+
+  const rows: string[][] = [];
+  if (info.online !== undefined) rows.push(['在线状态', info.online ? '已连接' : '未连接']);
+  if (info.battery !== undefined) rows.push(['电量', `${info.battery}%`]);
+  if (info.cid) rows.push(['CID / MID', `${info.cid.company}, ${info.cid.model}`]);
+  if (info.firmware) rows.push(['鼠标固件', info.firmware]);
+  if (info.receiverFirmware) rows.push(['接收器固件', info.receiverFirmware]);
+
+  if (rows.length === 0) {
+    console.log('没有读到任何字段。原始报文如下，可直接贴到 issue：');
+  } else {
+    console.log(table(['字段', '值'], rows));
+    console.log('');
+  }
+  for (const item of trace) {
+    const req = bytesToHex(item.request);
+    const rep = item.reply ? bytesToHex(item.reply) : '（无应答）';
+    console.log(`  0x${hex(item.command, 2)}  发 ${req}\n        收 ${rep}`);
+  }
+}
+
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
   switch (args.command) {
@@ -232,6 +275,9 @@ async function main(): Promise<void> {
       break;
     case 'devices':
       cmdDevices();
+      break;
+    case 'info':
+      await cmdInfo(args);
       break;
     case 'watch':
       await cmdWatch(args);
