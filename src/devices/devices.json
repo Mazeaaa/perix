@@ -1,0 +1,169 @@
+[
+  {
+    "id": "atk-compx-dongle",
+    "vendor": "atk",
+    "brand": "ATK / VXE",
+    "model": "Compx 方案接收器（型号待识别）",
+    "kind": "mouse",
+    "match": { "vendorId": "0x3554", "productIds": ["0xF58A"], "usagePage": "0xFF05" },
+    "capabilities": ["dpi", "polling_rate", "battery", "firmware_info"],
+    "transport": {
+      "dongle": { "supported": true, "codec": "vendor:0xFF05", "note": "接收器转发所有寻址到鼠标的报文" },
+      "wired": { "supported": true, "codec": "feature_report:8" }
+    },
+    "evidence": "family",
+    "state": "probe-only",
+    "protocol": "docs/protocol/atk.md",
+    "quirks": {
+      "minWriteIntervalMs": 20,
+      "exclusiveWith": ["ATK HUB.exe", "ATK V HUB.exe"],
+      "notes": ["VID 0x3554 为 Compx 方案，同一接收器可能带多个用途页（0xFF02~0xFF05）"]
+    }
+  },
+  {
+    "id": "atk-bitmouse-family",
+    "vendor": "atk",
+    "brand": "ATK / VXE",
+    "model": "BitMouse 方案设备（型号待识别）",
+    "kind": "mouse",
+    "match": { "vendorId": "0x373B", "productIds": [], "usagePage": "0xFF05" },
+    "capabilities": [
+      "dpi",
+      "polling_rate",
+      "lift_off_distance",
+      "debounce",
+      "lighting_zones",
+      "keymap",
+      "macro",
+      "onboard_profiles",
+      "battery"
+    ],
+    "transport": {
+      "wired": { "supported": true, "codec": "output_report:8", "note": "63 字节定长帧" },
+      "dongle": { "supported": true, "codec": "output_report:8" }
+    },
+    "evidence": "community",
+    "state": "probe-only",
+    "protocol": "docs/protocol/atk.md",
+    "lighting": {
+      "kind": "zones",
+      "zones": [{ "id": "main", "label": "主体灯效", "ledCount": 1 }],
+      "maxBrightness": 100
+    },
+    "quirks": {
+      "minWriteIntervalMs": 20,
+      "exclusiveWith": ["ATK HUB.exe", "ATK V HUB.exe"],
+      "notes": ["productIds 留空 = 该 VID 下所有设备都按厂商家族识别"]
+    }
+  },
+  {
+    "id": "mchose-sinowealth",
+    "vendor": "mchose",
+    "brand": "迈从 MCHOSE",
+    "model": "Sinowealth 方案设备（型号待识别）",
+    "kind": "mouse",
+    "match": { "vendorId": "0x41E4", "productIds": [] },
+    "capabilities": ["dpi", "polling_rate", "lighting_zones", "keymap", "onboard_profiles", "battery"],
+    "transport": {
+      "wired": { "supported": true, "codec": "feature_report:9", "note": "读 519 字节 / 写 519 字节配置块" },
+      "dongle": { "supported": false, "note": "2.4G 走分包 + 应答，另一套协议" }
+    },
+    "evidence": "community",
+    "state": "probe-only",
+    "protocol": "docs/protocol/mchose.md",
+    "quirks": {
+      "minWriteIntervalMs": 100,
+      "exclusiveWith": ["M HUB.exe", "MCHOSE HUB.exe"],
+      "notes": ["官网网页驱动前端未混淆，协议可直接对照"]
+    }
+  },
+  {
+    "id": "mchose-hall-keyboard",
+    "vendor": "mchose",
+    "brand": "迈从 MCHOSE",
+    "model": "磁轴键盘系列（Ace / Jet / Mix）",
+    "kind": "keyboard",
+    "match": { "vendorId": "0x3837", "productIds": [] },
+    "capabilities": [
+      "actuation",
+      "rapid_trigger",
+      "keymap",
+      "macro",
+      "lighting_per_key",
+      "onboard_profiles",
+      "polling_rate"
+    ],
+    "transport": {
+      "wired": { "supported": true, "codec": "feature_report:9" }
+    },
+    "evidence": "community",
+    "state": "probe-only",
+    "protocol": "docs/protocol/mchose.md",
+    "lighting": { "kind": "per_key", "maxBrightness": 100 },
+    "quirks": {
+      "minWriteIntervalMs": 100,
+      "exclusiveWith": ["M HUB.exe"],
+      "notes": ["复合 HID：接口 0 键盘、接口 1 配置、接口 2 高级键"]
+    }
+  },
+  {
+    "id": "aula-sonix",
+    "vendor": "aula",
+    "brand": "狼蛛 AULA",
+    "model": "Sonix 方案键盘（型号待识别）",
+    "kind": "keyboard",
+    "match": { "vendorId": "0x0C45", "productIds": [] },
+    "capabilities": [
+      "lighting_per_key",
+      "lighting_zones",
+      "keymap",
+      "macro",
+      "debounce",
+      "sleep_timeout",
+      "polling_rate"
+    ],
+    "transport": {
+      "wired": { "supported": true, "codec": "feature_report:7", "note": "8 字节定长帧" },
+      "dongle": { "supported": true, "codec": "output_report:65", "note": "65 字节，需包一层厂商标封信封" }
+    },
+    "evidence": "community",
+    "state": "probe-only",
+    "protocol": "docs/protocol/aula.md",
+    "lighting": { "kind": "per_key", "maxBrightness": 4 },
+    "quirks": {
+      "minWriteIntervalMs": 110,
+      "exclusiveWith": ["神光同步.exe", "AULA.exe"],
+      "notes": ["有线写入间隔官方同样限制在 ≥110ms，抄这个节奏最稳"]
+    }
+  },
+  {
+    "id": "logitech-hidpp",
+    "vendor": "logitech",
+    "brand": "罗技 Logitech",
+    "model": "HID++ 2.0 设备（型号待识别）",
+    "kind": "other",
+    "match": { "vendorId": "0x046D", "productIds": [] },
+    "capabilities": [
+      "dpi",
+      "polling_rate",
+      "lighting_zones",
+      "keymap",
+      "macro",
+      "battery",
+      "firmware_info",
+      "onboard_profiles"
+    ],
+    "transport": {
+      "wired": { "supported": true, "codec": "hidpp20:short/long" },
+      "dongle": { "supported": true, "codec": "hidpp20:via_receiver" },
+      "bluetooth": { "supported": false, "note": "蓝牙下多数配置通道不可用" }
+    },
+    "evidence": "community",
+    "state": "probe-only",
+    "protocol": "docs/protocol/logitech.md",
+    "quirks": {
+      "exclusiveWith": ["lghub.exe", "lghub_agent.exe"],
+      "notes": ["部分新设备需要额外校验，先走标准 HID++ 路径"]
+    }
+  }
+]

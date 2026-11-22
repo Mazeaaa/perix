@@ -1,0 +1,39 @@
+{
+  "name": "perix",
+  "version": "0.1.0",
+  "description": "一个软件管所有外设 · 把 ATK / 迈从 / 罗技 / 狼蛛 的驱动合并成统一控制台",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "perix": "dist/cli/index.js"
+  },
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20.11"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/cli/index.ts",
+    "test": "vitest run --no-file-parallelism",
+    "test:watch": "vitest",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "list": "tsx src/cli/index.ts list",
+    "doctor": "tsx src/cli/index.ts doctor"
+  },
+  "dependencies": {
+    "node-hid": "^3.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}
